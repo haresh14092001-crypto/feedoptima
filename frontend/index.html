@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedOptima - Livestock Ration Optimizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>FeedOptima</h1>
+            <p>Livestock Ration Optimization for Indian Farmers</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Optimize Feed Ration</h2>
+                <form id="rationForm">
+                    <div class="form-group">
+                        <label for="animalType">Animal Type:</label>
+                        <select id="animalType" required>
+                            <option value="cattle">Cattle</option>
+                            <option value="buffalo">Buffalo</option>
+                            <option value="goat">Goat</option>
+                            <option value="sheep">Sheep</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Animal Weight (kg):</label>
+                        <input type="number" id="weight" min="1" step="0.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="milkProduction">Milk Production (liters/day):</label>
+                        <input type="number" id="milkProduction" min="0" step="0.1" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pregnancyStage">Pregnancy Stage:</label>
+                        <select id="pregnancyStage">
+                            <option value="none">Not Pregnant</option>
+                            <option value="early">Early Pregnancy</option>
+                            <option value="mid">Mid Pregnancy</option>
+                            <option value="late">Late Pregnancy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lactationStage">Lactation Stage:</label>
+                        <select id="lactationStage">
+                            <option value="none">Dry</option>
+                            <option value="early">Early Lactation</option>
+                            <option value="mid">Mid Lactation</option>
+                            <option value="late">Late Lactation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="feedCost">Max Feed Cost (₹/day):</label>
+                        <input type="number" id="feedCost" min="1" step="1" value="300">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="includeAI"> Include AI Explanation
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Optimize Ration</button>
+                </form>
+            </section>
+
+            <section class="results-section" id="results" style="display: none;">
+                <h2>Optimized Ration</h2>
+                <div id="rationResults"></div>
+                <div id="aiExplanation" style="display: none;"></div>
+            </section>
+
+            <section class="catalog-section">
+                <h2>Feed Catalog</h2>
+                <button id="loadCatalog" class="btn-secondary">Load Feed Catalog</button>
+                <div id="catalogResults"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Powered by FeedOptima Backend API</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
