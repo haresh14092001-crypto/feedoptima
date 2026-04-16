@@ -17,13 +17,15 @@ rationForm.addEventListener('submit', async (e) => {
     // Get form data
     const formData = new FormData(rationForm);
     const requestData = {
-        animal_type: formData.get('animalType'),
-        weight_kg: parseFloat(formData.get('weight')),
-        milk_production_liters: parseFloat(formData.get('milkProduction')) || 0,
-        pregnancy_stage: formData.get('pregnancyStage'),
-        lactation_stage: formData.get('lactationStage'),
-        max_feed_cost_per_day: parseFloat(formData.get('feedCost')),
-        include_ai_explanation: document.getElementById('includeAI').checked
+        species: formData.get('animalType'),
+        body_weight_kg: parseFloat(formData.get('weight')),
+        milk_yield_lpd: parseFloat(formData.get('milkProduction')) || 0,
+        purpose: formData.get('purpose'),
+        use_ai: document.getElementById('includeAI').checked,
+        max_cost_per_day: parseFloat(formData.get('maxCost')) || null,
+        preferred_feeds: formData.get('preferredFeeds') ? formData.get('preferredFeeds').split(',').map(s => s.trim()).filter(s => s) : [],
+        avoid_feeds: formData.get('avoidFeeds') ? formData.get('avoidFeeds').split(',').map(s => s.trim()).filter(s => s) : [],
+        region: 'general'  // Could be made configurable later
     };
 
     // Show loading
@@ -80,43 +82,57 @@ function displayRationResults(data) {
     data.components.forEach(component => {
         html += `
             <div class="ration-item">
-                <h4>${component.feed_name}</h4>
-                <p><strong>Quantity:</strong> ${component.quantity_kg.toFixed(2)} kg</p>
-                <p><strong>Cost:</strong> ₹${component.cost_per_day.toFixed(2)}</p>
-                <p><strong>Nutrients:</strong> CP: ${component.crude_protein}%, TDN: ${component.tdn}%</p>
+                <h4>${component.name} (${component.category})</h4>
+                <p><strong>Quantity:</strong> ${component.weight_kg.toFixed(2)} kg</p>
+                <p><strong>Dry Matter:</strong> ${component.dry_matter_kg.toFixed(2)} kg</p>
+                <p><strong>Crude Protein:</strong> ${component.crude_protein_pct.toFixed(1)}%</p>
+                <p><strong>Energy:</strong> ${component.energy_mj.toFixed(1)} MJ</p>
+                <p><strong>Minerals:</strong> Ca: ${(component.calcium_pct * 100).toFixed(2)}%, P: ${(component.phosphorus_pct * 100).toFixed(2)}%</p>
+                <p><strong>Fiber:</strong> ${component.fiber_pct.toFixed(1)}%</p>
+                <p><strong>Cost:</strong> ₹${component.cost_inr.toFixed(2)}</p>
+                ${component.availability_score < 1 ? `<p><em>Availability: ${(component.availability_score * 100).toFixed(0)}%</em></p>` : ''}
             </div>
         `;
     });
 
-    html += `<div class="total-cost">Total Daily Cost: ₹${data.total_cost_per_day.toFixed(2)}</div>`;
+    html += `<div class="total-cost">Total Dry Matter: ${data.total_dry_matter_kg.toFixed(2)} kg | Total Daily Cost: ₹${data.total_cost_inr.toFixed(2)}</div>`;
 
-    if (data.instructions) {
-        html += `<div class="ration-item"><h4>Feeding Instructions:</h4><p>${data.instructions}</p></div>`;
+    if (data.summary) {
+        html += `<div class="ration-item"><h4>Summary:</h4><p>${data.summary}</p></div>`;
+    }
+
+    if (data.instructions && data.instructions.length > 0) {
+        html += `<div class="ration-item"><h4>Feeding Instructions:</h4><ol>`;
+        data.instructions.forEach(instruction => {
+            html += `<li>${instruction}</li>`;
+        });
+        html += `</ol></div>`;
     }
 
     rationResults.innerHTML = html;
 
     // Show AI explanation if available
-    if (data.ai_explanation) {
-        aiExplanation.innerHTML = `<h4>AI Explanation:</h4><p>${data.ai_explanation}</p>`;
+    if (data.ai_notes) {
+        aiExplanation.innerHTML = `<h4>AI Explanation:</h4><p>${data.ai_notes}</p>`;
         aiExplanation.style.display = 'block';
     }
 }
 
 // Display catalog
 function displayCatalog(data) {
-    if (!data.ingredients || data.ingredients.length === 0) {
+    if (!data || data.length === 0) {
         catalogResults.innerHTML = '<p>No ingredients found in catalog.</p>';
         return;
     }
 
-    let html = `<p>Found ${data.ingredients.length} feed ingredients:</p>`;
+    let html = `<p>Found ${data.length} feed ingredients:</p>`;
 
-    data.ingredients.forEach(ingredient => {
+    data.forEach(ingredient => {
+        const price = ingredient.latest_price_per_kg ? `₹${ingredient.latest_price_per_kg.toFixed(2)}/kg` : 'Price not set';
         html += `
             <div class="catalog-item">
-                <strong>${ingredient.name}</strong> - ₹${ingredient.price_per_kg}/kg
-                (CP: ${ingredient.crude_protein}%, TDN: ${ingredient.tdn}%)
+                <strong>${ingredient.name}</strong> (${ingredient.category}) - ${price}
+                <br>DM: ${ingredient.dry_matter_pct.toFixed(1)}%, CP: ${ingredient.crude_protein_pct.toFixed(1)}%, Energy: ${ingredient.energy_mj_per_kg.toFixed(1)} MJ/kg
             </div>
         `;
     });

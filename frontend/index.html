@@ -24,6 +24,7 @@
                             <option value="buffalo">Buffalo</option>
                             <option value="goat">Goat</option>
                             <option value="sheep">Sheep</option>
+                            <option value="poultry">Poultry</option>
                         </select>
                     </div>
 
@@ -38,28 +39,30 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="pregnancyStage">Pregnancy Stage:</label>
-                        <select id="pregnancyStage">
-                            <option value="none">Not Pregnant</option>
-                            <option value="early">Early Pregnancy</option>
-                            <option value="mid">Mid Pregnancy</option>
-                            <option value="late">Late Pregnancy</option>
+                        <label for="purpose">Purpose:</label>
+                        <select id="purpose" required>
+                            <option value="dairy">Dairy</option>
+                            <option value="growth">Growth</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="meat">Meat/Fattening</option>
+                            <option value="layer">Layer (Egg Production)</option>
+                            <option value="broiler">Broiler</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="lactationStage">Lactation Stage:</label>
-                        <select id="lactationStage">
-                            <option value="none">Dry</option>
-                            <option value="early">Early Lactation</option>
-                            <option value="mid">Mid Lactation</option>
-                            <option value="late">Late Lactation</option>
-                        </select>
+                        <label for="maxCost">Max Daily Cost (₹):</label>
+                        <input type="number" id="maxCost" min="0" step="10" placeholder="Optional budget limit">
                     </div>
 
                     <div class="form-group">
-                        <label for="feedCost">Max Feed Cost (₹/day):</label>
-                        <input type="number" id="feedCost" min="1" step="1" value="300">
+                        <label for="preferredFeeds">Preferred Feeds:</label>
+                        <input type="text" id="preferredFeeds" placeholder="e.g., Maize Grain, Soybean Meal (optional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avoidFeeds">Feeds to Avoid:</label>
+                        <input type="text" id="avoidFeeds" placeholder="e.g., Groundnut Oil Cake (optional)">
                     </div>
 
                     <div class="form-group">

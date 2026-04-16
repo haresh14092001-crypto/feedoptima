@@ -30,6 +30,10 @@ class RationRequest(BaseModel):
     )
     purpose: Purpose
     use_ai: bool = Field(False, description="Enable AI explanation for the response.")
+    max_cost_per_day: Optional[float] = Field(None, description="Maximum cost per day in INR")
+    preferred_feeds: List[str] = Field(default_factory=list, description="List of preferred feed names")
+    avoid_feeds: List[str] = Field(default_factory=list, description="List of feeds to avoid")
+    region: str = Field("general", description="Region for location-based pricing")
 
 
 class RationComponent(BaseModel):
@@ -39,7 +43,11 @@ class RationComponent(BaseModel):
     dry_matter_kg: float
     crude_protein_pct: float
     energy_mj: float
+    calcium_pct: float = 0.0
+    phosphorus_pct: float = 0.0
+    fiber_pct: float = 0.0
     cost_inr: float
+    availability_score: float = 1.0
 
 
 class RationResponse(BaseModel):
