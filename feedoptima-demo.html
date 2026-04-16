@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedOptima - Livestock Feed Ration Optimizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        main {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn-primary, .btn-secondary {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .results-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+
+        .ration-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .ration-item h3, .ration-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .ration-item p {
+            margin-bottom: 5px;
+        }
+
+        .total-cost {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 20px;
+        }
+
+        .ai-explanation {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .catalog-section {
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+
+        .catalog-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>FeedOptima</h1>
+            <p>Livestock Feed Ration Optimization for Indian Farmers</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Optimize Feed Ration</h2>
+                <form id="rationForm">
+                    <div class="form-group">
+                        <label for="animalType">Animal Type:</label>
+                        <select id="animalType" required>
+                            <option value="cattle">Cattle</option>
+                            <option value="buffalo">Buffalo</option>
+                            <option value="goat">Goat</option>
+                            <option value="sheep">Sheep</option>
+                            <option value="poultry">Poultry</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Animal Weight (kg):</label>
+                        <input type="number" id="weight" min="1" step="0.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="milkProduction">Milk Production (liters/day):</label>
+                        <input type="number" id="milkProduction" min="0" step="0.1" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="purpose">Purpose:</label>
+                        <select id="purpose" required>
+                            <option value="dairy">Dairy</option>
+                            <option value="growth">Growth</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="meat">Meat/Fattening</option>
+                            <option value="layer">Layer (Egg Production)</option>
+                            <option value="broiler">Broiler</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxCost">Max Daily Cost (₹):</label>
+                        <input type="number" id="maxCost" min="0" step="10" placeholder="Optional budget limit">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferredFeeds">Preferred Feeds:</label>
+                        <input type="text" id="preferredFeeds" placeholder="e.g., Maize Grain, Soybean Meal (optional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avoidFeeds">Feeds to Avoid:</label>
+                        <input type="text" id="avoidFeeds" placeholder="e.g., Groundnut Oil Cake (optional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="includeAI"> Include AI Explanation
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Optimize Ration</button>
+                </form>
+            </section>
+
+            <section class="results-section" id="results">
+                <h2>Optimized Ration</h2>
+                <div id="rationResults"></div>
+                <div id="aiExplanation" class="ai-explanation"></div>
+            </section>
+
+            <section class="catalog-section">
+                <h2>Feed Catalog</h2>
+                <button id="loadCatalog" class="btn-secondary">Load Feed Catalog</button>
+                <div id="catalogResults"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>FeedOptima Demo - AI-Enabled Livestock Feed Optimization</p>
+        </footer>
+    </div>
+
+    <script>
+        // FeedOptima Demo - Self-contained simulation
+
+        // Mock feed database
+        const mockFeedData = [
+            { name: "Napier Grass", category: "green_fodder", dm: 0.25, cp: 0.12, energy: 6.0, ca: 0.003, p: 0.002, fiber: 0.30, cost: 4.0, availability: 0.9 },
+            { name: "Maize Green", category: "green_fodder", dm: 0.22, cp: 0.09, energy: 6.5, ca: 0.002, p: 0.0015, fiber: 0.25, cost: 3.5, availability: 0.8 },
+            { name: "Wheat Straw", category: "dry_fodder", dm: 0.90, cp: 0.04, energy: 4.3, ca: 0.003, p: 0.001, fiber: 0.40, cost: 8.0, availability: 0.95 },
+            { name: "Maize Stover", category: "dry_fodder", dm: 0.90, cp: 0.05, energy: 5.0, ca: 0.002, p: 0.001, fiber: 0.35, cost: 7.0, availability: 0.85 },
+            { name: "Maize Grain", category: "concentrate", dm: 0.88, cp: 0.09, energy: 12.0, ca: 0.001, p: 0.003, fiber: 0.08, cost: 18.0, availability: 0.9 },
+            { name: "Soybean Meal", category: "concentrate", dm: 0.90, cp: 0.45, energy: 11.5, ca: 0.003, p: 0.006, fiber: 0.06, cost: 36.0, availability: 0.7 },
+            { name: "Wheat Bran", category: "concentrate", dm: 0.88, cp: 0.16, energy: 9.5, ca: 0.001, p: 0.011, fiber: 0.12, cost: 12.0, availability: 0.95 },
+            { name: "Groundnut Oil Cake", category: "concentrate", dm: 0.90, cp: 0.35, energy: 9.7, ca: 0.002, p: 0.005, fiber: 0.15, cost: 30.0, availability: 0.6 },
+            { name: "Rice Bran", category: "concentrate", dm: 0.88, cp: 0.12, energy: 8.5, ca: 0.001, p: 0.016, fiber: 0.14, cost: 14.0, availability: 0.9 },
+            { name: "Sunflower Oil Cake", category: "concentrate", dm: 0.90, cp: 0.30, energy: 9.0, ca: 0.003, p: 0.009, fiber: 0.18, cost: 28.0, availability: 0.5 },
+            { name: "Dicalcium Phosphate", category: "mineral_mix", dm: 1.0, cp: 0.0, energy: 0.0, ca: 0.23, p: 0.18, fiber: 0.0, cost: 120.0, availability: 0.8 },
+            { name: "Limestone", category: "mineral_mix", dm: 1.0, cp: 0.0, energy: 0.0, ca: 0.38, p: 0.0, fiber: 0.0, cost: 8.0, availability: 0.9 },
+            { name: "Vitamin Premix", category: "vitamin_premix", dm: 1.0, cp: 0.0, energy: 0.0, ca: 0.0, p: 0.0, fiber: 0.0, cost: 250.0, availability: 0.6 }
+        ];
+
+        // Mock nutritional requirements
+        const mockNutrientTargets = {
+            cattle: {
+                dairy: { dm: 12.0, cp: 0.14, energy: 55.0, ca: 0.006, p: 0.004, fiber: 0.18 },
+                growth: { dm: 8.5, cp: 0.16, energy: 45.0, ca: 0.008, p: 0.005, fiber: 0.15 },
+                maintenance: { dm: 7.0, cp: 0.12, energy: 35.0, ca: 0.005, p: 0.003, fiber: 0.20 },
+                meat: { dm: 9.0, cp: 0.14, energy: 50.0, ca: 0.006, p: 0.004, fiber: 0.12 }
+            },
+            buffalo: {
+                dairy: { dm: 14.0, cp: 0.14, energy: 65.0, ca: 0.007, p: 0.004, fiber: 0.18 },
+                growth: { dm: 9.5, cp: 0.16, energy: 52.0, ca: 0.008, p: 0.005, fiber: 0.15 },
+                maintenance: { dm: 8.0, cp: 0.12, energy: 40.0, ca: 0.005, p: 0.003, fiber: 0.20 },
+                meat: { dm: 10.0, cp: 0.14, energy: 58.0, ca: 0.006, p: 0.004, fiber: 0.12 }
+            },
+            goat: {
+                dairy: { dm: 6.0, cp: 0.16, energy: 28.0, ca: 0.008, p: 0.005, fiber: 0.15 },
+                growth: { dm: 4.5, cp: 0.18, energy: 22.0, ca: 0.009, p: 0.006, fiber: 0.14 },
+                maintenance: { dm: 3.5, cp: 0.14, energy: 18.0, ca: 0.006, p: 0.004, fiber: 0.18 },
+                meat: { dm: 5.0, cp: 0.16, energy: 25.0, ca: 0.007, p: 0.005, fiber: 0.13 }
+            },
+            sheep: {
+                dairy: { dm: 5.5, cp: 0.16, energy: 25.0, ca: 0.008, p: 0.005, fiber: 0.15 },
+                growth: { dm: 4.0, cp: 0.18, energy: 20.0, ca: 0.009, p: 0.006, fiber: 0.14 },
+                maintenance: { dm: 3.0, cp: 0.14, energy: 16.0, ca: 0.006, p: 0.004, fiber: 0.18 },
+                meat: { dm: 4.5, cp: 0.16, energy: 22.0, ca: 0.007, p: 0.005, fiber: 0.13 }
+            },
+            poultry: {
+                layer: { dm: 4.2, cp: 0.18, energy: 115.0, ca: 0.035, p: 0.004, fiber: 0.04 },
+                broiler: { dm: 4.5, cp: 0.22, energy: 130.0, ca: 0.010, p: 0.005, fiber: 0.03 }
+            }
+        };
+
+        // DOM Elements
+        const rationForm = document.getElementById('rationForm');
+        const resultsSection = document.getElementById('results');
+        const rationResults = document.getElementById('rationResults');
+        const aiExplanation = document.getElementById('aiExplanation');
+        const loadCatalogBtn = document.getElementById('loadCatalog');
+        const catalogResults = document.getElementById('catalogResults');
+
+        // Mock optimization function
+        function mockOptimizeRation(request) {
+            const target = mockNutrientTargets[request.species][request.purpose] ||
+                          mockNutrientTargets[request.species].maintenance;
+
+            // Simple ration calculation
+            const roughageRatio = request.purpose === 'dairy' ? 0.65 : 0.60;
+            const concentrateRatio = 1 - roughageRatio;
+
+            const roughageDM = target.dm * roughageRatio;
+            const concentrateDM = target.dm * concentrateRatio;
+
+            // Select feeds
+            const greenFodder = mockFeedData.find(f => f.category === 'green_fodder') || mockFeedData[0];
+            const dryFodder = mockFeedData.find(f => f.category === 'dry_fodder') || mockFeedData[2];
+            const concentrate = mockFeedData.find(f => f.category === 'concentrate' && f.cp > 0.15) || mockFeedData[5];
+
+            const greenWeight = roughageDM * 0.5 / greenFodder.dm;
+            const dryWeight = roughageDM * 0.5 / dryFodder.dm;
+            const concWeight = concentrateDM / concentrate.dm;
+
+            const components = [
+                {
+                    name: greenFodder.name,
+                    category: greenFodder.category,
+                    weight_kg: Math.round(greenWeight * 10) / 10,
+                    dry_matter_kg: Math.round(roughageDM * 0.5 * 10) / 10,
+                    crude_protein_pct: greenFodder.cp,
+                    energy_mj: Math.round(greenWeight * greenFodder.energy * 10) / 10,
+                    calcium_pct: greenFodder.ca,
+                    phosphorus_pct: greenFodder.p,
+                    fiber_pct: greenFodder.fiber,
+                    cost_inr: Math.round(greenWeight * greenFodder.cost * 10) / 10,
+                    availability_score: greenFodder.availability
+                },
+                {
+                    name: dryFodder.name,
+                    category: dryFodder.category,
+                    weight_kg: Math.round(dryWeight * 10) / 10,
+                    dry_matter_kg: Math.round(roughageDM * 0.5 * 10) / 10,
+                    crude_protein_pct: dryFodder.cp,
+                    energy_mj: Math.round(dryWeight * dryFodder.energy * 10) / 10,
+                    calcium_pct: dryFodder.ca,
+                    phosphorus_pct: dryFodder.p,
+                    fiber_pct: dryFodder.fiber,
+                    cost_inr: Math.round(dryWeight * dryFodder.cost * 10) / 10,
+                    availability_score: dryFodder.availability
+                },
+                {
+                    name: concentrate.name,
+                    category: concentrate.category,
+                    weight_kg: Math.round(concWeight * 10) / 10,
+                    dry_matter_kg: Math.round(concentrateDM * 10) / 10,
+                    crude_protein_pct: concentrate.cp,
+                    energy_mj: Math.round(concWeight * concentrate.energy * 10) / 10,
+                    calcium_pct: concentrate.ca,
+                    phosphorus_pct: concentrate.p,
+                    fiber_pct: concentrate.fiber,
+                    cost_inr: Math.round(concWeight * concentrate.cost * 10) / 10,
+                    availability_score: concentrate.availability
+                }
+            ];
+
+            const totalCost = components.reduce((sum, c) => sum + c.cost_inr, 0);
+            const totalDM = components.reduce((sum, c) => sum + c.dry_matter_kg, 0);
+
+            // Nutritional balance check
+            const avgCP = components.reduce((sum, c) => sum + (c.dry_matter_kg * c.crude_protein_pct), 0) / totalDM;
+            const totalEnergy = components.reduce((sum, c) => sum + c.energy_mj, 0);
+
+            const balance = [];
+            if (avgCP >= target.cp * 0.9) balance.push("✓ Protein adequate");
+            else balance.push("⚠ Protein may be low");
+
+            if (totalEnergy >= target.energy * 0.9) balance.push("✓ Energy adequate");
+            else balance.push("⚠ Energy may be low");
+
+            const summary = `Optimized ration for ${request.species} (${request.purpose}) - ${totalDM.toFixed(1)} kg DM, ₹${totalCost.toFixed(0)}/day. Nutritional balance: ${balance.join(' | ')}`;
+
+            const instructions = [
+                `Feed ${components[0].weight_kg.toFixed(1)} kg of ${components[0].name} and ${components[1].weight_kg.toFixed(1)} kg of ${components[1].name} as base roughages.`,
+                `Add ${components[2].weight_kg.toFixed(1)} kg of ${components[2].name} to meet nutrient requirements.`,
+                "Monitor animal performance and adjust based on body condition and health indicators.",
+                "Test feed quality periodically as nutrient content can vary seasonally."
+            ];
+
+            let aiNotes = null;
+            if (request.use_ai) {
+                aiNotes = `This ration provides balanced nutrition for your ${request.species} with adequate protein (${(avgCP * 100).toFixed(1)}%) and energy (${totalEnergy.toFixed(0)} MJ) for ${request.purpose} purposes. The roughage-to-concentrate ratio ensures good rumen health while meeting production requirements.`;
+            }
+
+            return {
+                species: request.species,
+                purpose: request.purpose,
+                body_weight_kg: request.body_weight_kg,
+                milk_yield_lpd: request.milk_yield_lpd || 0,
+                total_dry_matter_kg: Math.round(totalDM * 10) / 10,
+                total_cost_inr: Math.round(totalCost * 10) / 10,
+                components: components,
+                summary: summary,
+                instructions: instructions,
+                ai_notes: aiNotes
+            };
+        }
+
+        // Form submission handler
+        rationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form data
+            const formData = new FormData(rationForm);
+            const requestData = {
+                species: formData.get('animalType'),
+                body_weight_kg: parseFloat(formData.get('weight')),
+                milk_yield_lpd: parseFloat(formData.get('milkProduction')) || 0,
+                purpose: formData.get('purpose'),
+                use_ai: document.getElementById('includeAI').checked,
+                max_cost_per_day: parseFloat(formData.get('maxCost')) || null,
+                preferred_feeds: formData.get('preferredFeeds') ? formData.get('preferredFeeds').split(',').map(s => s.trim()).filter(s => s) : [],
+                avoid_feeds: formData.get('avoidFeeds') ? formData.get('avoidFeeds').split(',').map(s => s.trim()).filter(s => s) : [],
+                region: 'general'
+            };
+
+            // Show loading
+            rationResults.innerHTML = '<div class="loading">Optimizing ration...</div>';
+            resultsSection.style.display = 'block';
+            aiExplanation.style.display = 'none';
+
+            try {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const data = mockOptimizeRation(requestData);
+                displayRationResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                rationResults.innerHTML = `<div class="error">Error optimizing ration: ${error.message}</div>`;
+            }
+        });
+
+        // Load catalog handler
+        loadCatalogBtn.addEventListener('click', async () => {
+            catalogResults.innerHTML = '<div class="loading">Loading feed catalog...</div>';
+
+            try {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                displayCatalog(mockFeedData);
+
+            } catch (error) {
+                console.error('Error:', error);
+                catalogResults.innerHTML = `<div class="error">Error loading catalog: ${error.message}</div>`;
+            }
+        });
+
+        // Display ration results
+        function displayRationResults(data) {
+            let html = '<h3>Recommended Feed Components:</h3>';
+
+            data.components.forEach(component => {
+                html += `
+                    <div class="ration-item">
+                        <h4>${component.name} (${component.category.replace('_', ' ')})</h4>
+                        <p><strong>Quantity:</strong> ${component.weight_kg.toFixed(2)} kg</p>
+                        <p><strong>Dry Matter:</strong> ${component.dry_matter_kg.toFixed(2)} kg</p>
+                        <p><strong>Crude Protein:</strong> ${(component.crude_protein_pct * 100).toFixed(1)}%</p>
+                        <p><strong>Energy:</strong> ${component.energy_mj.toFixed(1)} MJ</p>
+                        <p><strong>Minerals:</strong> Ca: ${(component.calcium_pct * 100).toFixed(2)}%, P: ${(component.phosphorus_pct * 100).toFixed(2)}%</p>
+                        <p><strong>Fiber:</strong> ${(component.fiber_pct * 100).toFixed(1)}%</p>
+                        <p><strong>Cost:</strong> ₹${component.cost_inr.toFixed(2)}</p>
+                        ${component.availability_score < 1 ? `<p><em>Availability: ${(component.availability_score * 100).toFixed(0)}%</em></p>` : ''}
+                    </div>
+                `;
+            });
+
+            html += `<div class="total-cost">Total Dry Matter: ${data.total_dry_matter_kg.toFixed(2)} kg | Total Daily Cost: ₹${data.total_cost_inr.toFixed(2)}</div>`;
+
+            if (data.summary) {
+                html += `<div class="ration-item"><h4>Summary:</h4><p>${data.summary}</p></div>`;
+            }
+
+            if (data.instructions && data.instructions.length > 0) {
+                html += `<div class="ration-item"><h4>Feeding Instructions:</h4><ol>`;
+                data.instructions.forEach(instruction => {
+                    html += `<li>${instruction}</li>`;
+                });
+                html += `</ol></div>`;
+            }
+
+            rationResults.innerHTML = html;
+
+            // Show AI explanation if available
+            if (data.ai_notes) {
+                aiExplanation.innerHTML = `<h4>AI Explanation:</h4><p>${data.ai_notes}</p>`;
+                aiExplanation.style.display = 'block';
+            }
+        }
+
+        // Display catalog
+        function displayCatalog(data) {
+            if (!data || data.length === 0) {
+                catalogResults.innerHTML = '<p>No ingredients found in catalog.</p>';
+                return;
+            }
+
+            let html = `<p>Found ${data.length} feed ingredients:</p>`;
+
+            data.forEach(ingredient => {
+                const price = `₹${ingredient.cost.toFixed(2)}/kg`;
+                html += `
+                    <div class="catalog-item">
+                        <strong>${ingredient.name}</strong> (${ingredient.category.replace('_', ' ')}) - ${price}
+                        <br>DM: ${(ingredient.dm * 100).toFixed(1)}%, CP: ${(ingredient.cp * 100).toFixed(1)}%, Energy: ${ingredient.energy.toFixed(1)} MJ/kg
+                        <br>Ca: ${(ingredient.ca * 100).toFixed(2)}%, P: ${(ingredient.p * 100).toFixed(2)}%, Fiber: ${(ingredient.fiber * 100).toFixed(1)}%
+                        ${ingredient.availability < 1 ? `<br><em>Availability: ${(ingredient.availability * 100).toFixed(0)}%</em>` : ''}
+                    </div>
+                `;
+            });
+
+            catalogResults.innerHTML = html;
+        }
+
+        // Initialize - try to load catalog on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Optional: Auto-load catalog on page load
+            // loadCatalogBtn.click();
+        });
+    </script>
+</body>
+</html>
